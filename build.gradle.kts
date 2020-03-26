@@ -21,7 +21,7 @@ repositories {
 
 detekt {
     parallel = true
-    input = files(subprojects.map { it.projectDir }, "buildSrc")
+    input = files(projectDir, "buildSrc")
     config = files(rootDir.resolve("detekt-config.yml"))
 }
 

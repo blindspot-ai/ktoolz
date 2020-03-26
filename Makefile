@@ -16,3 +16,6 @@ release-commit:
 
 # use - make release VERSION=0.0.1
 release: update-version check release-commit publish
+
+detekt:
+	./gradlew detekt
