@@ -12,18 +12,18 @@ repositories {
 ```
 Then to import Ktoolz to Gradle project use:
 ```Kotlin
-implementation("ai.blindspot.ktoolz:ktoolz:1.0.3")
+implementation("ai.blindspot.ktoolz:ktoolz:1.1.0")
 ```
 Or with Groovy DSL
 ```groovy
-implementation 'ai.blindspot.ktoolz:ktoolz:1.0.3'
+implementation 'ai.blindspot.ktoolz:ktoolz:1.1.0'
 ```
 To import Ktoolz to Maven project use:
 ```xml
 <dependency>
   <groupId>ai.blindspot.ktoolz</groupId>
   <artifactId>ktoolz</artifactId>
-  <version>1.0.3</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
@@ -40,7 +40,7 @@ bintray.apiKey=<api.key>
 ```
 To publish the library, one must execute `./gradlew bintrayUpload` or using the `Makefile` - `make publish`.
 
-To release new version of the Ktoolz simply call `make release VERSION=0.0.0` where `0.0.0` is the new version. 
+To release a new version of the Ktoolz simply call `make release VERSION=0.0.0` where `0.0.0` is the new version. 
 
 ## Maintainers
 [Lukas Forst](https://github.com/LukasForst) and [Petr Eichler](https://github.com/Petr-Eichler)

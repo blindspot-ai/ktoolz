@@ -3,16 +3,16 @@
  */
 object Versions {
     const val binTrayPlugin = "1.8.4"
-    const val kotlin = "1.3.70"
+    const val kotlin = "1.4.32"
 
-    const val kotlinLogging = "1.6.26"
+    const val slf4j = "1.7.29"
+    const val kotlinLogging = "1.12.5"
 
-    const val sonarqube = "2.7.1"
-    const val detekt = "1.0.0"
+    const val detekt = "1.16.0"
 
     // testing dependencies
-    const val junit = "5.5.0"
-    const val mockk = "1.9.3"
+    const val junit = "5.7.1"
+    const val mockk = "1.11.0"
 
     const val logBack = "1.2.3"
 }

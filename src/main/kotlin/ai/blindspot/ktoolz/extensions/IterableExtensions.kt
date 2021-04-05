@@ -1,14 +1,20 @@
 package ai.blindspot.ktoolz.extensions
 
-import mu.KLogging
+import mu.KotlinLogging
 import java.util.ArrayList
 import java.util.Comparator
 import java.util.NavigableSet
 import java.util.Random
 import java.util.TreeSet
 
+
+const val DEFAULT_COLLECTION_SIZE = 10
+const val MINIMUM_CAPACITY = 16
+const val MAX_ENTRIES_TO_SHOW = 500
+
+
 @PublishedApi
-internal val iterableLogger = KLogging().logger("IterableExtensions")
+internal val iterableLogger = KotlinLogging.logger("IterableExtensions")
 
 /**
  * Function that will return a random element from the iterable.
@@ -135,7 +141,7 @@ inline fun <T, R> Iterable<T>.flatMapToSet(transform: (T) -> Iterable<R>): Set<R
 /**
  * Returns the most frequently occurring value of the given function or `null` if there are no elements.
  */
-fun <T, R> Iterable<T>.dominantValueBy(selector: (T) -> R): R? = this.groupingBy(selector).eachCount().maxBy { it.value }?.key
+fun <T, R> Iterable<T>.dominantValueBy(selector: (T) -> R): R? = this.groupingBy(selector).eachCount().maxByOrNull { it.value }?.key
 
 /**
  * Creates cartesian product between all the elements from [this] and [other] iterable. E.g. when [this] contains [1,2,3] and [other] contains ['a', 'b'], the
@@ -218,6 +224,7 @@ inline fun <T> Iterable<T>.singleOrEmpty(predicate: (T) -> Boolean): T? {
  * Returns single element, or `null` if the collection is empty.
  * Throws [IllegalArgumentException] when multiple elements are matching predicate.
  */
+@Suppress("ReturnCount")
 fun <T> Iterable<T>.singleOrEmpty(): T? {
     when (this) {
         is List -> return if (size == 0) null else if (size == 1) this[0] else throw IllegalArgumentException("Collection contains more than one element.")
@@ -264,7 +271,7 @@ inline fun <T, R> Iterable<T>.setDifferenceBy(other: Iterable<T>, selector: (T) 
  * The returned map preserves the entry iteration order of the original collection.
  */
 fun <K, V> Iterable<Pair<K, V>>.assoc(): Map<K, V> {
-    return assocTo(LinkedHashMap(collectionSizeOrDefault(10)))
+    return assocTo(LinkedHashMap(collectionSizeOrDefault()))
 }
 
 /**
@@ -292,8 +299,7 @@ fun <K, V, M : MutableMap<in K, in V>> Iterable<Pair<K, V>>.assocTo(destination:
  * The returned map preserves the entry iteration order of the original collection.
  */
 inline fun <T, K, V> Iterable<T>.assoc(transform: (T) -> Pair<K, V>): Map<K, V> {
-    val capacity = mapCapacity(collectionSizeOrDefault(10)).coerceAtLeast(16)
-    return assocTo(LinkedHashMap(capacity), transform)
+    return assocTo(LinkedHashMap(computeCapacity()), transform)
 }
 
 
@@ -322,8 +328,7 @@ inline fun <T, K, V, M : MutableMap<in K, in V>> Iterable<T>.assocTo(destination
  * The returned map preserves the entry iteration order of the original collection.
  */
 inline fun <T, K> Iterable<T>.assocBy(keySelector: (T) -> K): Map<K, T> {
-    val capacity = mapCapacity(collectionSizeOrDefault(10)).coerceAtLeast(16)
-    return assocByTo(LinkedHashMap(capacity), keySelector)
+    return assocByTo(LinkedHashMap(computeCapacity()), keySelector)
 }
 
 /**
@@ -351,8 +356,7 @@ inline fun <T, K, M : MutableMap<in K, in T>> Iterable<T>.assocByTo(destination:
  * The returned map preserves the entry iteration order of the original collection.
  */
 inline fun <T, K, V> Iterable<T>.assocBy(keySelector: (T) -> K, valueTransform: (T) -> V): Map<K, V> {
-    val capacity = mapCapacity(collectionSizeOrDefault(10)).coerceAtLeast(16)
-    return assocByTo(LinkedHashMap(capacity), keySelector, valueTransform)
+    return assocByTo(LinkedHashMap(computeCapacity()), keySelector, valueTransform)
 }
 
 /**
@@ -383,7 +387,7 @@ inline fun <T, K, V, M : MutableMap<in K, in V>> Iterable<T>.assocByTo(destinati
  *
  */
 inline fun <K, V> Iterable<K>.assocWith(valueSelector: (K) -> V): Map<K, V> {
-    val result = LinkedHashMap<K, V>(mapCapacity(collectionSizeOrDefault(10)).coerceAtLeast(16))
+    val result = LinkedHashMap<K, V>(computeCapacity())
     return assocWithTo(result, valueSelector)
 }
 
@@ -411,7 +415,7 @@ internal inline fun <K, V, M : MutableMap<in K, in V>> M.checkUniqueness(expecte
     if (this.size == expectedSize) return
     val duplicatedKeys = grouping().filterValues { it.size > 1 }
     iterableLogger.warn(Throwable()) {
-        val entries = duplicatedKeys.entries.toString().take(500) //ensures that huge collections will not consume too much space
+        val entries = duplicatedKeys.entries.toString().take(MAX_ENTRIES_TO_SHOW) //ensures that huge collections will not consume too much space
         "The map should contain $expectedSize entries but the actual size is ${this.size}. The affected entries are $entries."
     }
 
@@ -425,21 +429,28 @@ internal const val INT_MAX_POWER_OF_TWO: Int = Int.MAX_VALUE / 2 + 1
  * very large sizes, allows support non-collection classes, and provides consistency for all map based class construction.
  */
 @PublishedApi
-internal fun mapCapacity(expectedSize: Int): Int {
-    if (expectedSize < 3) {
-        return expectedSize + 1
+@Suppress("MagicNumber")
+internal fun mapCapacity(expectedSize: Int): Int =
+    when {
+        expectedSize < 3 -> expectedSize + 1
+        expectedSize < INT_MAX_POWER_OF_TWO -> expectedSize + expectedSize / 3
+        else -> Int.MAX_VALUE // any large value
     }
-    if (expectedSize < INT_MAX_POWER_OF_TWO) {
-        return expectedSize + expectedSize / 3
-    }
-    return Int.MAX_VALUE // any large value
-}
 
 /**
  * Returns the size of this iterable if it is known, or the specified [default] value otherwise.
  */
 @PublishedApi
-internal fun <T> Iterable<T>.collectionSizeOrDefault(default: Int): Int = if (this is Collection<*>) this.size else default
+internal fun <T> Iterable<T>.collectionSizeOrDefault(default: Int = DEFAULT_COLLECTION_SIZE): Int =
+    if (this is Collection<*>) this.size else default
+
+
+/**
+ * Computes capacity of new collection based on the current collection size.
+ */
+@PublishedApi
+internal fun <T> Iterable<T>.computeCapacity(): Int =
+    mapCapacity(collectionSizeOrDefault()).coerceAtLeast(MINIMUM_CAPACITY)
 
 /**
  * Returns three lists with separated values from list of triples.
