@@ -3,14 +3,22 @@
 
 Collection of Kotlin extension functions and utilities. 
 
-## Using Ktoolz
-Ktoolz is hosted on [JCenter](https://bintray.com) and therefore one must include to the project.
+## Using ktoolz
+ktoolz is hosted on GitHub Packages and therefore one must include to the project. Unfortunately GH Packages do not 
+support anonymous access to maven repositories, so you need to generate new PAT (Personal access token) to access 
+the package.
 ```kotlin
 repositories {
-    jcenter()
+    maven {
+        url = uri("https://maven.pkg.github.com/blindspot-ai/ktoolz")
+        credentials {
+            username = "token"
+            password = "<YOUR_PAT>"
+        }
+    }
 }
 ```
-Then to import Ktoolz to Gradle project use:
+Then to import ktoolz to Gradle project use:
 ```Kotlin
 implementation("ai.blindspot.ktoolz:ktoolz:1.1.0")
 ```
@@ -18,7 +26,7 @@ Or with Groovy DSL
 ```groovy
 implementation 'ai.blindspot.ktoolz:ktoolz:1.1.0'
 ```
-To import Ktoolz to Maven project use:
+To import ktoolz to Maven project use:
 ```xml
 <dependency>
   <groupId>ai.blindspot.ktoolz</groupId>
@@ -30,15 +38,8 @@ To import Ktoolz to Maven project use:
 
 
 ## Deployment
-The Ktoolz library is currently hosted on the JCenter repository.
-To deploy the library to JCenter repository one must set up deployment secrets,
-the secrets should be stored in the file `ktoolz.properties`, that is not tracked by the git.
-The file has following structure:
-```properties
-bintray.user=<user>
-bintray.apiKey=<api.key>
-```
-To publish the library, one must execute `./gradlew bintrayUpload` or using the `Makefile` - `make publish`.
+The library packages are deployed to GitHub Packages using GitHub Actions. Make sure that `build.gradle.kts` has 
+the correct version set and then create release in GitHub. The package will be deployed automatically.
 
 To release a new version of the Ktoolz simply call `make release VERSION=0.0.0` where `0.0.0` is the new version. 
 

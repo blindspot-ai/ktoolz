@@ -1,9 +1,6 @@
 check:
 	./gradlew check
 
-publish: check
-	./gradlew bintrayUpload
-
 # use - make update-version VERSION=0.0.1
 update-version:
 	sed -i 's/version = .*/version = "$(VERSION)"/' build.gradle.kts
@@ -15,4 +12,4 @@ release-commit:
 	 git push --follow-tags
 
 # use - make release VERSION=0.0.1
-release: update-version check release-commit publish
+release: update-version check release-commit

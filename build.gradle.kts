@@ -1,4 +1,3 @@
-import com.jfrog.bintray.gradle.BintrayExtension
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -9,7 +8,6 @@ plugins {
     kotlin("jvm") version Versions.kotlin
 
     id("io.gitlab.arturbosch.detekt") version Versions.detekt
-    id("com.jfrog.bintray") version Versions.binTrayPlugin
 }
 
 group = "ai.blindspot.ktoolz"
@@ -100,23 +98,15 @@ publishing {
             artifact(javadocJar)
         }
     }
-}
 
-bintray {
-    user = Props.bintrayUser.getOrDefault()
-    key = Props.bintrayApiKey.getOrDefault()
-    publish = true
-    setPublications(publicationName)
-    pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
-        repo = "maven"
-        name = "ktoolz"
-        userOrg = "blindspot-ai"
-        websiteUrl = "https://blindspot.ai"
-        githubRepo = "blindspot-ai/ktoolz"
-        vcsUrl = "https://github.com/blindspot-ai/ktoolz"
-        description = "Collection of Kotlin extension functions and utilities."
-        setLabels("kotlin")
-        setLicenses("MIT")
-        desc = description
-    })
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/blindspot-ai/ktoolz")
+            credentials {
+                username = Props.githubActor.get()
+                password = Props.githubToken.get()
+            }
+        }
+    }
 }
