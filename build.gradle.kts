@@ -104,8 +104,8 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/blindspot-ai/ktoolz")
             credentials {
-                username = Props.githubActor.get()
-                password = Props.githubToken.get()
+                username = Props.githubActor.getOrNull()
+                password = Props.githubToken.getOrNull()
             }
         }
     }
