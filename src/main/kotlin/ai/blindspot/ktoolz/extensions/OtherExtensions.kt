@@ -114,6 +114,7 @@ private val bracketPairs = setOf("()", "[]", "<>", "{}")
  * Typical usage: the toString() method of a large collection-like object should contain only a very short description
  *  of each collection item. This is done, for example, in [itemsToString] ().
  */
+@Suppress("ReturnCount")
 fun Any?.toShortString(): String {
     val longString = this.toString()
     if (longString.isEmpty()) return "EMPTY STRING" // Should not happen

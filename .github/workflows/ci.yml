@@ -1,0 +1,25 @@
+name: CI Build Pipeline
+
+on: [pull_request]
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+
+      - name: Execute detekt with gradle
+        run: ./gradlew detekt
+
+      - name: Execute test with gradle
+        run: ./gradlew test
+
+      - name: Execute all checks with gradle
+        run: ./gradlew check

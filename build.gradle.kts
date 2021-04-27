@@ -13,20 +13,29 @@ plugins {
 }
 
 group = "ai.blindspot.ktoolz"
-version = "1.0.3"
+version = "1.1.0"
 
 repositories {
-    jcenter()
+    mavenCentral()
+    jcenter {
+        content {
+            // Only download the 'kotlinx-html-jvm' module from JCenter, but nothing else.
+            // detekt needs 'kotlinx-html-jvm' for the HTML report.
+            // TODO: remove this section, when JetBrains (and detekt) fully migrate to other repository
+            includeModule("org.jetbrains.kotlinx", "kotlinx-html-jvm")
+        }
+    }
 }
 
 detekt {
     parallel = true
-    input = files(subprojects.map { it.projectDir }, "buildSrc")
     config = files(rootDir.resolve("detekt-config.yml"))
+    buildUponDefaultConfig = true
 }
 
 dependencies {
     implementation(Libs.kotlinStdlib) // kotlin std
+    implementation(Libs.slf4j) // logging API
     implementation(Libs.kotlinLogging) // logging DSL
 
     // testing
@@ -37,13 +46,8 @@ dependencies {
     testImplementation(TestLibs.junitApi) // junit testing framework
     testImplementation(TestLibs.junitParams) // generated parameters for tests
 
-    testRuntime(TestLibs.junitEngine) // testing runtime
+    testRuntimeOnly(TestLibs.junitEngine) // testing runtime
 }
-
-/**
- * Folder with stored jacoco test coverage results
- */
-val jacocoReports = "$buildDir${File.separator}jacoco${File.separator}reports"
 
 tasks {
     // when check is executed, detekt and test coverage verification must be run as well
@@ -55,13 +59,10 @@ tasks {
     jacocoTestReport {
         dependsOn(test)
 
-        @Suppress("UnstableApiUsage") // Required for test coverage reports, however the api is still incubating
         reports {
             csv.isEnabled = false
             xml.isEnabled = true
-            xml.destination = file("$jacocoReports.xml")
             html.isEnabled = true
-            html.destination = file(jacocoReports)
         }
     }
 
@@ -71,7 +72,6 @@ tasks {
     }
 
     withType<Test> {
-        @Suppress("UnstableApiUsage") // Required for running tests, however the api is still incubating
         useJUnitPlatform()
     }
 

@@ -9,7 +9,7 @@ package ai.blindspot.ktoolz.extensions
  * The returned map preserves the entry iteration order of the original collection.
  */
 fun <K, V> Sequence<Pair<K, V>>.assoc(): Map<K, V> {
-    return assocTo(LinkedHashMap(collectionSizeOrDefault(10)))
+    return assocTo(LinkedHashMap(collectionSizeOrDefault()))
 }
 
 /**
@@ -37,8 +37,7 @@ fun <K, V, M : MutableMap<in K, in V>> Sequence<Pair<K, V>>.assocTo(destination:
  * The returned map preserves the entry iteration order of the original collection.
  */
 inline fun <T, K, V> Sequence<T>.assoc(transform: (T) -> Pair<K, V>): Map<K, V> {
-    val capacity = mapCapacity(collectionSizeOrDefault(10)).coerceAtLeast(16)
-    return assocTo(LinkedHashMap(capacity), transform)
+    return assocTo(LinkedHashMap(computeCapacity()), transform)
 }
 
 /**
@@ -50,8 +49,7 @@ inline fun <T, K, V> Sequence<T>.assoc(transform: (T) -> Pair<K, V>): Map<K, V> 
  * The returned map preserves the entry iteration order of the original collection.
  */
 inline fun <T, K> Sequence<T>.assocBy(keySelector: (T) -> K): Map<K, T> {
-    val capacity = mapCapacity(collectionSizeOrDefault(10)).coerceAtLeast(16)
-    return assocByTo(LinkedHashMap(capacity), keySelector)
+    return assocByTo(LinkedHashMap(computeCapacity()), keySelector)
 }
 
 /**
@@ -62,8 +60,7 @@ inline fun <T, K> Sequence<T>.assocBy(keySelector: (T) -> K): Map<K, T> {
  * The returned map preserves the entry iteration order of the original collection.
  */
 inline fun <T, K, V> Sequence<T>.assocBy(keySelector: (T) -> K, valueTransform: (T) -> V): Map<K, V> {
-    val capacity = mapCapacity(collectionSizeOrDefault(10)).coerceAtLeast(16)
-    return assocByTo(LinkedHashMap(capacity), keySelector, valueTransform)
+    return assocByTo(LinkedHashMap(computeCapacity()), keySelector, valueTransform)
 }
 
 /**
@@ -126,7 +123,7 @@ inline fun <T, K, V, M : MutableMap<in K, in V>> Sequence<T>.assocTo(destination
  *
  */
 inline fun <K, V> Sequence<K>.assocWith(valueSelector: (K) -> V): Map<K, V> {
-    val result = LinkedHashMap<K, V>(mapCapacity(collectionSizeOrDefault(10)).coerceAtLeast(16))
+    val result = LinkedHashMap<K, V>(computeCapacity())
     return assocWithTo(result, valueSelector)
 }
 
@@ -150,4 +147,12 @@ inline fun <K, V, M : MutableMap<in K, in V>> Sequence<K>.assocWithTo(destinatio
  * Returns the size of this iterable if it is known, or the specified [default] value otherwise.
  */
 @PublishedApi
-internal fun <T> Sequence<T>.collectionSizeOrDefault(default: Int): Int = if (this is Collection<*>) this.size else default
+internal fun <T> Sequence<T>.collectionSizeOrDefault(default: Int = DEFAULT_COLLECTION_SIZE): Int = if (this is Collection<*>) this.size else default
+
+/**
+ * Computes capacity of new collection based on the current collection size.
+ */
+@PublishedApi
+internal fun <T> Sequence<T>.computeCapacity(): Int {
+    return mapCapacity(collectionSizeOrDefault()).coerceAtLeast(MINIMUM_CAPACITY)
+}

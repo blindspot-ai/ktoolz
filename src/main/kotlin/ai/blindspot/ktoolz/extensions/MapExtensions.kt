@@ -10,6 +10,7 @@ import java.util.Random
 /**
  * Randomly selects item with respect to the current weight distribution.
  */
+@Suppress("ReturnCount")
 fun <T> Map<T, Double>.getWeightedRandom(rand: Random): T {
     val total = this.values.sum()
     if (total == 0.0) return this.keys.getRandomElement(rand)
