@@ -1,6 +1,12 @@
 # ktoolz
 [![GitHub version](https://badge.fury.io/gh/blindspot-ai%2Fktoolz.svg)](https://badge.fury.io/gh/blindspot-ai%2Fktoolz)
 
+**No longer maintained!**
+
+This library is no longer maintained, please use the successor library `katlib` https://github.com/LukasForst/katlib
+
+---
+
 Collection of Kotlin extension functions and utilities. 
 
 ## Using Ktoolz
